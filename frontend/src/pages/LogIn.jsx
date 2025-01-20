@@ -1,5 +1,5 @@
 import { SquareArrowRight, ShieldCheck } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import axios from "axios";
 import { useState } from "react";
 
@@ -15,6 +15,9 @@ const LogIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [token, setToken] = useState(false);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState("");
+
   // handle inputs
   const handleInput = (e) => {
     const { name, value } = e.target;
@@ -23,27 +26,48 @@ const LogIn = () => {
     } else if (name == "password") {
       setPassword(value);
     }
-    console.log(name, value);
   };
 
   // Authenticating user login
 
   const authenticateUser = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
     // Input validation
     if (!email || !password) {
-      console.log("Email or password is required");
+      setError("Email or password can't be empty");
+      setIsLoading(false);
+      return;
     }
     try {
-      const user = await axios.get(
-        `https://climap.onrender.com/api/users/login?email=${email}&password=${password}`
+      const user = await axios.post(
+        " https://climap.onrender.com/api/users/login",
+        { email, password }
       );
 
-      setToken(user.data.token);
-      console.log("Token: ", token);
+      // handle successful login
+      const token = user.data.token;
+      setToken(token);
+
+      // store in local storage
+      localStorage.setItem("token", token);
+
+      // redirect to addFaciliy page
+      return <Navigate to="/add" />;
     } catch (err) {
-      console.log("Error: ", err);
+      if (err.response) {
+        // server error
+        setError(err.response.data.error || "Login failed");
+      } else if (err.request) {
+        // network error
+        setError("Network error. Please try again");
+      } else {
+        setError("AN error occured. Please try again");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -95,6 +119,11 @@ const LogIn = () => {
               Fill the form to sign into your account
             </p>
           </div>
+          {error && (
+            <div className="flex flex-col border border-red-600 bg-red-100 p-2 text-sm justify-center items-center my-4">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={authenticateUser} className="flex flex-col gap-6">
             <div className="flex flex-col gap-1">
@@ -143,7 +172,8 @@ const LogIn = () => {
               className="flex flex-row justify-center items-center gap-2 mt-2 p-3 w-full rounded-lg bg-primary hover:bg-primaryDark text-white font-medium transition-colors"
               type="submit"
             >
-              Sign In <SquareArrowRight size={16} />
+              {isLoading ? "Signin In..." : "Sign In"}{" "}
+              {!isLoading && <SquareArrowRight size={16} />}
             </button>
           </form>
 
