@@ -1,10 +1,11 @@
 import { SquareArrowRight, ShieldCheck } from "lucide-react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useState } from "react";
 
 // Constant Promotional texts
 const LogIn = () => {
+  const navigate = useNavigate();
   const features = [
     "Access to exclusive content and resources",
     "Regular updates on new features",
@@ -55,7 +56,7 @@ const LogIn = () => {
       localStorage.setItem("token", token);
 
       // redirect to addFaciliy page
-      return <Navigate to="/add" />;
+      navigate("/addfacility");
     } catch (err) {
       if (err.response) {
         // server error
