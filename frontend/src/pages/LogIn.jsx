@@ -1,5 +1,6 @@
 import { SquareArrowRight, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 const LogIn = () => {
   const features = [
@@ -9,6 +10,18 @@ const LogIn = () => {
     "Instant Access to Nearby Facilities",
   ];
 
+  const authenticateUser = async () => {
+    e.preventDefault();
+    const { email, password } = req.body;
+    // const loggedUser = await axios.get(
+    //   "https://climap.onrender.com/api/users/login",
+    //   { email, password }
+    // );
+    // console.log(email);
+    // console.log(password);
+    // console.log(loggedUser);
+    console.log("Hello world");
+  };
   return (
     <div className="min-h-screen bg-white flex flex-row justify-center items-center">
       {/* Left side - Features panel */}
@@ -58,7 +71,7 @@ const LogIn = () => {
             </p>
           </div>
 
-          <form className="flex flex-col gap-6">
+          <form onSubmit={authenticateUser} className="flex flex-col gap-6">
             <div className="flex flex-col gap-1">
               <label className="text-sm text-gray-700 font-medium">Email</label>
               <input
