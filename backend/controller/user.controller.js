@@ -43,11 +43,13 @@ export const login = async (req, res) => {
   try {
     // check if user exists
     const user = await User.findOne({ email: email.toLowerCase() });
+    console.log("User found:", !!user);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
     // compare passwords
     const verifyPassword = await bcrypt.compare(password, user.password);
+    console.log("Password verified: ", verifyPassword);
     if (!verifyPassword) {
       return res.status(401).json({ error: "Invalid Credentials" });
     }
@@ -61,7 +63,7 @@ export const login = async (req, res) => {
     // send token
     res.status(200).json({ message: "Login successful", token: token });
   } catch (err) {
-    console.log({ loginerror: err });
+    console.log("loginerror: ", err);
     res.status(500).json({ error: "Internal server error" });
   }
 };

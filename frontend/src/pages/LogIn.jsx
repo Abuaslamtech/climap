@@ -1,7 +1,9 @@
 import { SquareArrowRight, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { useState } from "react";
 
+// Constant Promotional texts
 const LogIn = () => {
   const features = [
     "Access to exclusive content and resources",
@@ -10,18 +12,41 @@ const LogIn = () => {
     "Instant Access to Nearby Facilities",
   ];
 
-  const authenticateUser = async () => {
-    e.preventDefault();
-    const { email, password } = req.body;
-    // const loggedUser = await axios.get(
-    //   "https://climap.onrender.com/api/users/login",
-    //   { email, password }
-    // );
-    // console.log(email);
-    // console.log(password);
-    // console.log(loggedUser);
-    console.log("Hello world");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [token, setToken] = useState(false);
+  // handle inputs
+  const handleInput = (e) => {
+    const { name, value } = e.target;
+    if (name == "email") {
+      setEmail(value);
+    } else if (name == "password") {
+      setPassword(value);
+    }
+    console.log(name, value);
   };
+
+  // Authenticating user login
+
+  const authenticateUser = async (e) => {
+    e.preventDefault();
+
+    // Input validation
+    if (!email || !password) {
+      console.log("Email or password is required");
+    }
+    try {
+      const user = await axios.get(
+        `https://climap.onrender.com/api/users/login?email=${email}&password=${password}`
+      );
+
+      setToken(user.data.token);
+      console.log("Token: ", token);
+    } catch (err) {
+      console.log("Error: ", err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white flex flex-row justify-center items-center">
       {/* Left side - Features panel */}
@@ -76,9 +101,11 @@ const LogIn = () => {
               <label className="text-sm text-gray-700 font-medium">Email</label>
               <input
                 type="email"
+                name="email"
                 placeholder="Enter your email"
                 className="p-3 w-full border rounded-lg bg-white transition-all outline-none
                 focus:border-primary"
+                onChange={handleInput}
               />
             </div>
 
@@ -88,9 +115,11 @@ const LogIn = () => {
               </label>
               <input
                 type="password"
+                name="password"
                 placeholder="Enter your password"
                 className="p-3 w-full border rounded-lg bg-white transition-all outline-none
                 focus:border-primary"
+                onChange={handleInput}
               />
             </div>
 
