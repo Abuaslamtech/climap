@@ -58,7 +58,7 @@ const HomePage = () => {
   return (
     <div className="bg-white">
       {/* Hero Section - Improved Responsiveness */}
-      <div className="bg-neutralGray min-h-[500px] flex items-center py-12 md:py-0">
+      <div className="bg-neutralGray min-h-[500px] flex items-center py-12 px-8 md:py-0">
         <div className="container mx-auto px-4 grid md:grid-cols-2 gap-8 items-center">
           {/* Text Content */}
           <div className="space-y-6 text-center md:text-left">
