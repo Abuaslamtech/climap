@@ -22,9 +22,9 @@ const LogIn = () => {
   // handle inputs
   const handleInput = (e) => {
     const { name, value } = e.target;
-    if (name == "email") {
+    if (name === "email") {
       setEmail(value);
-    } else if (name == "password") {
+    } else if (name === "password") {
       setPassword(value);
     }
   };
@@ -57,7 +57,7 @@ const LogIn = () => {
 
       // redirect to addFaciliy page
       console.log("Login successful, navigating to /addfacility");
-      navigate("/addfacility");
+      navigate("/addfacility", { replace: true });
     } catch (err) {
       if (err.response) {
         // server error
