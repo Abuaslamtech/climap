@@ -18,7 +18,7 @@ export const add = async (req, res) => {
     }
     // check if facility exist
     const existingFacility = await Facilities.findOne({
-      name: properties.name,
+      name,
     });
     if (existingFacility) {
       return res.status(409).json({ message: "Facility already exists" });
