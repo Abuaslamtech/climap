@@ -1,10 +1,19 @@
 import Facilities from "../model/facilities.model.js";
 
 export const add = async (req, res) => {
-  const { properties, geometry } = req.body;
+  const {
+    name,
+    state_name,
+    lga_name,
+    lga_code,
+    state_code,
+    category,
+    type,
+    geometry,
+  } = req.body;
   try {
     //   validate input
-    if (!properties.name || !properties.state_name || !properties.lga_name) {
+    if (!name || !state_name || !lga_name) {
       return res.status(400).json({ message: "Missing required fields" });
     }
     // check if facility exist
@@ -16,14 +25,14 @@ export const add = async (req, res) => {
     }
     // save facility
     const newFacility = new Facilities({
-      name: properties.name,
-      state_name: properties.state_name,
-      lga_name: properties.lga_name,
-      lga_code: properties.lga_code,
-      state_code: properties.state_code,
-      category: properties.category,
-      type: properties.type,
-      geometry: { type: geometry.type, coordinates: geometry.coordinates },
+      name,
+      state_name,
+      lga_name,
+      lga_code,
+      state_code,
+      category,
+      type,
+      geometry,
       registeredBy: "Admin",
     });
 
