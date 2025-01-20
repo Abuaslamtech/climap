@@ -56,6 +56,7 @@ const LogIn = () => {
       localStorage.setItem("token", token);
 
       // redirect to addFaciliy page
+      console.log("Login successful, navigating to /addfacility");
       navigate("/addfacility");
     } catch (err) {
       if (err.response) {
