@@ -37,12 +37,29 @@ export const add = async (req, res) => {
   }
 };
 export const retrieve = async (req, res) => {
+  const page = req.query.page || 1;
+  const pageSize = 12;
+
   try {
-    const facilities = await Facilities.find();
+    // calculate skip value
+    const skipValue = (page - 1) * pageSize;
+
+    // get total count for pagination
+    const totalCount = await Facilities.countDocuments();
+
+    // get facilities with pagination
+    const facilities = await Facilities.find().skip(skipValue).limit(pageSize);
+
     if (facilities.length === 0) {
-      return res.status(400).json({ message: "No facility found" });
+      return res.status(404).json({ message: "No facility found" });
     }
-    res.status(200).json(facilities);
+
+    res.status(200).json({
+      facilities,
+      currentPage: page,
+      totalPages: Math.ceil(totalCount / pageSize),
+      totalfacilities: totalCount,
+    });
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Couldnt retrieve data" });
