@@ -1,5 +1,6 @@
 import Facilities from "../model/facilities.model.js";
 
+// Add new facility
 export const add = async (req, res) => {
   const {
     name,
@@ -45,19 +46,24 @@ export const add = async (req, res) => {
     res.status(500).json({ message: "Internal Server error" });
   }
 };
+
+// In your retrieve controller:
 export const retrieve = async (req, res) => {
-  const page = req.query.page || 1;
+  const page = parseInt(req.query.page) || 1;
   const pageSize = 12;
+  const state = req.query.state;
 
   try {
-    // calculate skip value
+    let query = {};
+    if (state) {
+      query.state_name = state;
+    }
+
     const skipValue = (page - 1) * pageSize;
-
-    // get total count for pagination
-    const totalCount = await Facilities.countDocuments();
-
-    // get facilities with pagination
-    const facilities = await Facilities.find().skip(skipValue).limit(pageSize);
+    const totalCount = await Facilities.countDocuments(query);
+    const facilities = await Facilities.find(query)
+      .skip(skipValue)
+      .limit(pageSize);
 
     if (facilities.length === 0) {
       return res.status(404).json({ message: "No facility found" });
@@ -71,7 +77,7 @@ export const retrieve = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Couldnt retrieve data" });
+    res.status(500).json({ message: "Couldn't retrieve data" });
   }
 };
 export const modify = async (req, res) => {};
