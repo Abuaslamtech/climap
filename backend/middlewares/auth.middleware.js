@@ -1,3 +1,5 @@
+import jwt from "jsonwebtoken"; // Add this import at the top of the file
+
 export const authenticateUser = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
   console.log("Received token:", token);
