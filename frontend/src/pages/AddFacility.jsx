@@ -7,6 +7,9 @@ import {
   AlertCircle,
 } from "lucide-react";
 import NavBar from "../components/NavBar";
+import axios from "axios";
+import { states } from "../utils/states";
+import { lga } from "../utils/lga";
 
 const AddFacility = () => {
   const [formData, setFormData] = useState({
@@ -52,18 +55,38 @@ const AddFacility = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
+    const token = localStorage.getItem("token");
+
+    console.log("Token:", token);
 
     setIsSubmitting(true);
     try {
-      // API call implementation here
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      };
+
+      console.log("Request Config:", config); // Log full config
+
+      const data = await axios.post(
+        "https://climap.onrender.com/api/facilities/add",
+        formData,
+        config
+      );
       console.log("Form data:", formData);
+      console.log(data);
     } catch (error) {
-      console.error("Submission error:", error);
+      console.error("Submission error:", error.response?.data);
+      setErrors((prev) => ({
+        ...prev,
+        submission: error.response?.data?.message || "Submission failed",
+      }));
     } finally {
       setIsSubmitting(false);
     }
   };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -133,7 +156,7 @@ const AddFacility = () => {
                   <label className="block text-gray-700 font-medium mb-2">
                     Facility Type*
                   </label>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid md:grid-cols-3 gap-4">
                     {facilityTypes.map((type) => (
                       <button
                         key={type}
@@ -199,7 +222,11 @@ const AddFacility = () => {
                       } focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none appearance-none`}
                     >
                       <option value="">Select a state</option>
-                      {/* Add state options here */}
+                      {states.map((state) => (
+                        <option key={state} value={state}>
+                          {state}
+                        </option>
+                      ))}
                     </select>
                     <ChevronRight
                       className="absolute right-4 top-1/2 transform -translate-y-1/2 rotate-90 text-gray-500"
@@ -229,7 +256,12 @@ const AddFacility = () => {
                       } focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none appearance-none`}
                     >
                       <option value="">Select an LGA</option>
-                      {/* Add LGA options based on selected state */}
+                      {formData.state_name &&
+                        lga[formData.state_name].map((localGovt) => (
+                          <option key={localGovt} value={localGovt}>
+                            {localGovt}
+                          </option>
+                        ))}
                     </select>
                     <ChevronRight
                       className="absolute right-4 top-1/2 transform -translate-y-1/2 rotate-90 text-gray-500"
@@ -244,15 +276,62 @@ const AddFacility = () => {
                   )}
                 </div>
 
-                {/* Map Location Picker */}
+                {/* Map Location Coordinates */}
                 <div>
                   <label className="block text-gray-700 font-medium mb-2">
-                    Pin Location on Map*
+                    Facility Coordinates*
                   </label>
-                  <div className="h-[300px] bg-neutralGray rounded-lg flex items-center justify-center">
-                    <p className="text-gray-500">
-                      Map Component Integration Here
-                    </p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm text-gray-600 mb-1 block">
+                        Latitude
+                      </label>
+                      <input
+                        type="number"
+                        name="latitude"
+                        value={formData.geometry.coordinates[1]}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            geometry: {
+                              ...prev.geometry,
+                              coordinates: [
+                                prev.geometry.coordinates[0],
+                                parseFloat(e.target.value),
+                              ],
+                            },
+                          }))
+                        }
+                        step="any"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
+                        placeholder="Enter latitude"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm text-gray-600 mb-1 block">
+                        Longitude
+                      </label>
+                      <input
+                        type="number"
+                        name="longitude"
+                        value={formData.geometry.coordinates[0]}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            geometry: {
+                              ...prev.geometry,
+                              coordinates: [
+                                parseFloat(e.target.value),
+                                prev.geometry.coordinates[1],
+                              ],
+                            },
+                          }))
+                        }
+                        step="any"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none"
+                        placeholder="Enter longitude"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
