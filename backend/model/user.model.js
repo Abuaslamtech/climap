@@ -21,7 +21,10 @@ const UserSchema = new mongoose.Schema(
       minlength: [8, "Must be atleast 8 characters"],
     },
     state: { type: String, required: true, trim: true, enum: states },
+    resetPasswordToken: { type: String },
+    resetPasswordExpires: { type: Date },
   },
+
   { timestamps: true }
 );
 
