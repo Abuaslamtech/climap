@@ -2,7 +2,7 @@ import { createTransporter } from "./emailTransporter.utils";
 
 export const sendWelcomeEmail = async (email, name) => {
   try {
-    const createTransporter = createTransporter();
+    const transporter = createTransporter();
 
     const mailOptions = {
       from: `"Climap Team" <climap@gmail.com>`,

@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from "uuid";
 import { createTransporter } from "./emailTransporter.utils";
 
 // create transporter
-const createTransporter = createTransporter();
+const transporter = createTransporter();
 
 // generate reset token
 const generateToken = () => {
