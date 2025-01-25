@@ -98,6 +98,7 @@ export const sendResetLink = async (req, res) => {
 
     // send email
     const emailResult = await sendPasswordResetEmail(email, resetlink);
+    console.log(emailResult);
 
     if (emailResult.sent) {
       return res.status(200).json({ message: "Email sent successfully" });
