@@ -114,6 +114,7 @@ export const sendResetLink = async (req, res) => {
 // reset the password link
 export const resetPassword = async (req, res) => {
   const { newPassword, token } = req.body;
+  console.log("Received request with token:", token); // Log the token
   if (!token || !newPassword) {
     return res.status(400).json({ error: "Missing required fields" });
   }
@@ -123,6 +124,7 @@ export const resetPassword = async (req, res) => {
       resetPasswordExpires: { $gt: Date.now() },
     });
     if (!user) {
+      console.log("User not found for token:", token); // Log if user is not found
       return res.status(404).json({ error: "User not found" });
     }
 
@@ -132,9 +134,10 @@ export const resetPassword = async (req, res) => {
     user.resetPasswordExpires = undefined;
     await user.save();
 
+    console.log("Password reset successful for user:", user.email); // Log success
     res.status(200).json({ message: "Password reset successful" });
   } catch (err) {
-    console.error(err);
+    console.error("Error during password reset:", err); // Log any errors
     res.status(500).json({ error: "Internal server error" });
   }
 };
