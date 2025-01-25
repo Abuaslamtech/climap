@@ -2,44 +2,50 @@ import jwt from "jsonwebtoken";
 import User from "../model/user.model.js";
 import bcrypt from "bcrypt";
 import { generateToken, sendPasswordResetEmail } from "../utils/email.utils.js";
+import { sendWelcomeEmail } from "../utils/welcomeEmail.utils.js";
 
-// registration logic
 export const register = async (req, res) => {
   const { name, email, password, state } = req.body;
   try {
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
-      return res.status(409).json({ error: "User already exist" });
+      return res.status(409).json({ error: "User already exists" });
     }
 
-    //   hass password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    //   save user
     const newUser = new User({
       name,
       email: email.toLowerCase(),
       password: hashedPassword,
       state,
     });
+
     await newUser.save();
-    res
-      .status(201)
-      .location(`users/${newUser._id}`)
-      .json({
-        message: "User registered succesfully",
-        user: {
-          name: newUser.name,
-          email: newUser.email,
-          state: newUser.state,
-        },
-      });
+
+    // Send welcome email BEFORE sending response
+    try {
+      await sendWelcomeEmail(newUser.email, newUser.name);
+    } catch (emailError) {
+      console.error("Email sending failed:", emailError);
+      // Continue even if email fails - don't block registration
+    }
+
+    // Send single response
+    res.status(201).json({
+      message: "User registered successfully",
+      user: {
+        name: newUser.name,
+        email: newUser.email,
+        state: newUser.state,
+      },
+      emailSent: !emailError, 
+    });
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: "Internal Server error" });
+    console.error(err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 // login logic
 export const login = async (req, res) => {
   const { email, password } = req.body;

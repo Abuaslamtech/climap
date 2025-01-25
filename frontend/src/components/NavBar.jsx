@@ -7,7 +7,7 @@ import {
   LogOut,
   Menu,
   X,
-  User,
+
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -86,6 +86,9 @@ const NavBar = () => {
             </>
           ) : (
             <div className="flex gap-4">
+              <NavMenuItem to="/about" icon={LogIn}>
+                About
+              </NavMenuItem>
               <NavMenuItem to="/login" icon={LogIn}>
                 Login
               </NavMenuItem>

@@ -8,6 +8,7 @@ import ProtectedRoute from "./utils/ProtectedRoute";
 import ResetSuccess from "./pages/ResetSuccess";
 import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
+import About from "./pages/About";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/resetsuccess" element={<ResetSuccess />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
+      <Route path="/about" element={<About />} />
     </Routes>
   );
 }
