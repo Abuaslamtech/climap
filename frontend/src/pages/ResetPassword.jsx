@@ -2,9 +2,13 @@ import { SquareArrowRight, ShieldCheck } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
+  const { token } = useParams();
+  console.log(token);
+
   const features = [
     "Secure password reset mechanism",
     "Protecting your account access",
@@ -22,14 +26,24 @@ const ResetPassword = () => {
     setError("");
     setIsLoading(true);
 
+    if (password !== confirmPassword) {
+      setError("Passwords d not match");
+      setIsLoading(false);
+      return;
+    }
     try {
-      await axios.post("https://climap.onrender.com/api/users/resetPassword", {
-        password,
-      });
-
-      // Clear any previous errors
-      setError("");
+      console.log("Sending request with token:", token); // Verify token being sent
+      const response = await axios.post(
+        "https://climap.onrender.com/api/users/resetPassword",
+        {
+          token,
+          newPassword: password,
+        }
+      );
+      console.log("Response from server:", response.data); // Verify server response
+      navigate("/login");
     } catch (err) {
+      console.error("Error during password reset:", err); // Log any errors
       const errorMessage =
         err.response?.data?.error || err.message || "Password reset failed";
 
