@@ -100,7 +100,7 @@ export const sendResetLink = async (req, res) => {
     const emailResult = await sendPasswordResetEmail(email, resetlink);
     console.log(emailResult);
 
-    if (emailResult.sent) {
+    if (emailResult) {
       return res.status(200).json({ message: "Email sent successfully" });
     } else {
       res.status(500).json({ message: "Failed to send Email" });
