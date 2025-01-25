@@ -113,20 +113,28 @@ export const sendResetLink = async (req, res) => {
 
 // reset the password link
 export const resetPassword = async (req, res) => {
-  const { email, newPassword } = req.body;
+  const { newPassword, token } = req.body;
+  if (!token || !newPassword) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
   try {
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
     await user.save();
 
     res.status(200).json({ message: "Password reset successful" });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.status(500).json({ error: "Internal server error" });
   }
 };
