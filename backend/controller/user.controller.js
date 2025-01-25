@@ -94,7 +94,7 @@ export const sendResetLink = async (req, res) => {
     await user.save();
 
     // construct reset link
-    const resetlink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    const resetlink = `https://cli-map-vercel.app/reset-password/${resetToken}`;
 
     // send email
     const emailResult = await sendPasswordResetEmail(email, resetlink);
