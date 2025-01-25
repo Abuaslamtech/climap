@@ -1,5 +1,4 @@
 import nodemailer from "nodemailer";
-
 // Export the transporter creation function
 export const createTransporter = () => {
   return nodemailer.createTransport({

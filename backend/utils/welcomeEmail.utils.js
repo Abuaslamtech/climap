@@ -1,4 +1,4 @@
-import { createTransporter } from "./emailTransporter.utils";
+import { createTransporter } from "./emailTransporter.utils.js";
 
 export const sendWelcomeEmail = async (email, name) => {
   try {

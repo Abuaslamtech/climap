@@ -1,9 +1,5 @@
-import nodemailer from "nodemailer";
 import { v4 as uuidv4 } from "uuid";
-import { createTransporter } from "./emailTransporter.utils";
-
-// create transporter
-const transporter = createTransporter();
+import { createTransporter } from "./emailTransporter.utils.js";
 
 // generate reset token
 const generateToken = () => {
