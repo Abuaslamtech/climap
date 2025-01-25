@@ -173,6 +173,7 @@ const LogIn = () => {
             <button
               className="flex flex-row justify-center items-center gap-2 mt-2 p-3 w-full rounded-lg bg-primary hover:bg-primaryDark text-white font-medium transition-colors"
               type="submit"
+              disabled={isLoading}
             >
               {isLoading ? "Signin In..." : "Sign In"}{" "}
               {!isLoading && <SquareArrowRight size={16} />}

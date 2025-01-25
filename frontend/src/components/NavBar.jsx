@@ -7,6 +7,7 @@ import {
   LogOut,
   Menu,
   X,
+  User,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -98,7 +99,7 @@ const NavBar = () => {
         {/* Mobile Menu Toggle */}
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="md:hidden text-white"
+          className="md:hidden text-white z-50"
         >
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>

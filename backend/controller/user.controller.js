@@ -1,7 +1,9 @@
 import jwt from "jsonwebtoken";
 import User from "../model/user.model.js";
 import bcrypt from "bcrypt";
+import { generateToken, sendPasswordResetEmail } from "../utils/email.utils.js";
 
+// registration logic
 export const register = async (req, res) => {
   const { name, email, password, state } = req.body;
   try {
@@ -38,6 +40,7 @@ export const register = async (req, res) => {
   }
 };
 
+// login logic
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -64,6 +67,65 @@ export const login = async (req, res) => {
     res.status(200).json({ message: "Login successful", token: token });
   } catch (err) {
     console.log("loginerror: ", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// send reset password link logic
+export const sendResetLink = async (req, res) => {
+  // Add input validation
+  if (!req.body || !req.body.email) {
+    return res.status(400).json({ error: "Email is required" });
+  }
+  const email = req.body.email;
+
+  try {
+    const user = await User.findOne({ email: email.toLowerCase() });
+    console.log(user);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // generate token
+    const resetToken = generateToken();
+    // store reset token
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000;
+    await user.save();
+
+    // construct reset link
+    const resetlink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+
+    // send email
+    const emailResult = await sendPasswordResetEmail(email, resetlink);
+
+    if (emailResult.sent) {
+      return res.status(200).json({ message: "Email sent successfully" });
+    } else {
+      res.status(500).json({ message: "Failed to send Email" });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: "Server Error" });
+  }
+};
+
+// reset the password link
+export const resetPassword = async (req, res) => {
+  const { email, newPassword } = req.body;
+  try {
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ message: "Password reset successful" });
+  } catch (err) {
+    console.log(err);
     res.status(500).json({ error: "Internal server error" });
   }
 };
