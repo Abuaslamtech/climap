@@ -1,16 +1,9 @@
 import nodemailer from "nodemailer";
 import { v4 as uuidv4 } from "uuid";
+import { createTransporter } from "./emailTransporter.utils";
 
 // create transporter
-const createTransporter = () => {
-  return nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: "abuaslamtech@gmail.com",
-      pass: "ogjgysphuuepbugl",
-    },
-  });
-};
+const createTransporter = createTransporter();
 
 // generate reset token
 const generateToken = () => {
