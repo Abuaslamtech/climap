@@ -72,7 +72,7 @@ const ResetSuccess = () => {
           <div className="text-center text-gray-600 flex flex-row gap-2 justify-center">
             <p>Didn't receive the email?</p>
             <Link
-              to="/resetPassword"
+              to="/forgot-password"
               className="text-primary hover:text-primaryDark"
             >
               Try Again
