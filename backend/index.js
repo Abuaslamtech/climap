@@ -4,6 +4,8 @@ import userRoutes from "./routes/user.routes.js";
 import facilitiesRoutes from "./routes/facilities.routes.js";
 import cors from "cors";
 const app = express();
+import dotenv from "dotenv";
+dotenv.config();
 
 // connect database
 connectDB();
