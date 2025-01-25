@@ -7,7 +7,7 @@ import {
   LogOut,
   Menu,
   X,
-
+  Target,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -76,6 +76,9 @@ const NavBar = () => {
               <NavMenuItem to="/" icon={FilePenLine}>
                 Request Modification
               </NavMenuItem>
+              <NavMenuItem to="/about" icon={Target}>
+                About
+              </NavMenuItem>
               <button
                 onClick={logOut}
                 className="flex items-center gap-2 bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-colors"
@@ -86,7 +89,7 @@ const NavBar = () => {
             </>
           ) : (
             <div className="flex gap-4">
-              <NavMenuItem to="/about" icon={LogIn}>
+              <NavMenuItem to="/about" icon={Target}>
                 About
               </NavMenuItem>
               <NavMenuItem to="/login" icon={LogIn}>
@@ -127,6 +130,9 @@ const NavBar = () => {
             <NavMenuItem to="/" icon={FilePenLine}>
               Request Modification
             </NavMenuItem>
+            <NavMenuItem to="/about" icon={Target}>
+              About
+            </NavMenuItem>
             <button
               onClick={logOut}
               className="flex items-center gap-3 bg-red-500 text-white p-3 rounded-lg hover:bg-red-600 transition-colors"
@@ -137,6 +143,9 @@ const NavBar = () => {
           </>
         ) : (
           <>
+            <NavMenuItem to="/about" icon={Target}>
+              About
+            </NavMenuItem>
             <NavMenuItem to="/login" icon={LogIn}>
               Login
             </NavMenuItem>
