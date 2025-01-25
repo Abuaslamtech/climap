@@ -59,6 +59,7 @@ const Register = () => {
     setIsLoading(true);
 
     if (!validateForm()) return;
+    console.log(formData);
     try {
       const data = await axios.post(
         "https://climap.onrender.com/api/users/register",

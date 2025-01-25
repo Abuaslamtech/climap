@@ -5,7 +5,7 @@ import { generateToken, sendPasswordResetEmail } from "../utils/email.utils.js";
 import { sendWelcomeEmail } from "../utils/welcomeEmail.utils.js";
 
 export const register = async (req, res) => {
-  const { name, email, password, state } = req.body;
+  const { fullName, email, password, state } = req.body;
   try {
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
@@ -15,7 +15,7 @@ export const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
-      name,
+      name: fullName,
       email: email.toLowerCase(),
       password: hashedPassword,
       state,
