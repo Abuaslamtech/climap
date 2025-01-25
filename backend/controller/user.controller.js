@@ -24,10 +24,12 @@ export const register = async (req, res) => {
     await newUser.save();
 
     // Send welcome email BEFORE sending response
+    let emailSent = true;
     try {
       await sendWelcomeEmail(newUser.email, newUser.name);
-    } catch (emailError) {
-      console.error("Email sending failed:", emailError);
+    } catch (err) {
+      console.error("Email sending failed:", err);
+      emailSent = false;
       // Continue even if email fails - don't block registration
     }
 
@@ -39,11 +41,14 @@ export const register = async (req, res) => {
         email: newUser.email,
         state: newUser.state,
       },
-      emailSent: !emailError, 
+      emailSent,
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({
+      error: "Internal Server Error",
+      details: err.message, // Only include in development environment
+    });
   }
 };
 // login logic
