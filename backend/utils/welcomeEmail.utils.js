@@ -59,10 +59,11 @@ export const sendWelcomeEmail = async (email, name) => {
       `,
     };
 
-    await transporter.sendMail(mailOptions);
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`Email sent to ${email}:`, info.messageId);
     return true;
   } catch (err) {
-    console.error(err);
+    console.error(`Failed to send email to ${email}:`, err);
     return false;
   }
 };
