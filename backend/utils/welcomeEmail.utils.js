@@ -5,7 +5,7 @@ export const sendWelcomeEmail = async (email, name) => {
     const transporter = createTransporter();
 
     const mailOptions = {
-      from: `"Climap Team" <climap@gmail.com>`,
+      from: `"Climap Team" <abuaslamtech@gmail.com>`,
       to: email,
       subject: "Welcome to Climap - Your Healthcare Mapping Journey Begins!",
       html: `

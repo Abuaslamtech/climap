@@ -12,7 +12,7 @@ const sendPasswordResetEmail = async (email, resetLink) => {
     const transporter = createTransporter();
 
     const mailOptions = {
-      from: `"Climap" <climap@gmail.com>`,
+      from: `"Climap" <abuaslamtech@gmail.com>`,
       to: email,
       subject: "Climap Password Reset",
       html: `
