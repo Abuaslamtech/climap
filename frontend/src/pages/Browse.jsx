@@ -70,14 +70,15 @@ const Browse = () => {
       const response = await axios.get(
         `https://climap.onrender.com/api/facilities/retrieve?page=${currentPage}`
       );
-      if (!response.ok) throw new Error("Failed to fetch facilities");
-      const data = await response.json();
 
+      console.log(response);
+      const data = response.data;
+      console.log("Response Data:", data);
       setFacilities(data.facilities);
       setTotalPages(data.totalPages);
       setTotalFacilities(data.facilities.length);
-    } catch (error) {
-      setError(error.message);
+    } catch (err) {
+      setError(err.response);
     } finally {
       setIsLoading(false);
     }
@@ -98,14 +99,14 @@ const Browse = () => {
       const response = await axios.get(
         `https://climap.onrender.com/api/facilities/search?${queryParams}`
       );
-      if (!response.ok) throw new Error("Search failed");
-      const data = await response.json();
+
+      const data = response.data;
 
       setFacilities(data.facilities);
       setTotalPages(data.totalPages);
       setTotalFacilities(data.totalFacilities);
-    } catch (error) {
-      setError(error.message);
+    } catch (err) {
+      setError(err.response);
     } finally {
       setIsLoading(false);
     }

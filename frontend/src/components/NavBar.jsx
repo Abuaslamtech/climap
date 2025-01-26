@@ -73,7 +73,7 @@ const NavBar = () => {
               <NavMenuItem to="/addFacility" icon={MapPinPlus}>
                 Add Facility
               </NavMenuItem>
-              <NavMenuItem to="/" icon={FilePenLine}>
+              <NavMenuItem to="/modification" icon={FilePenLine}>
                 Request Modification
               </NavMenuItem>
               <NavMenuItem to="/about" icon={Target}>
@@ -127,7 +127,7 @@ const NavBar = () => {
             <NavMenuItem to="/addFacility" icon={MapPinPlus}>
               Add Facility
             </NavMenuItem>
-            <NavMenuItem to="/" icon={FilePenLine}>
+            <NavMenuItem to="/modification" icon={FilePenLine}>
               Request Modification
             </NavMenuItem>
             <NavMenuItem to="/about" icon={Target}>

@@ -9,6 +9,7 @@ import ResetSuccess from "./pages/ResetSuccess";
 import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
 import About from "./pages/About";
+import Modification from "./pages/Modification";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
       <Route path="/resetsuccess" element={<ResetSuccess />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
       <Route path="/about" element={<About />} />
+      <Route path="/modification" element={<Modification />} />
     </Routes>
   );
 }
