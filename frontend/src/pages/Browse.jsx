@@ -18,6 +18,7 @@ import { lga } from "../utils/lga";
 import Footer from "../components/Footer";
 import { MapModal } from "../components/MapModal";
 import { Pagination } from "../components/Pagination";
+import axios from "axios";
 
 const Browse = () => {
   // State variables
@@ -66,7 +67,7 @@ const Browse = () => {
   const fetchFacilities = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(
+      const response = await axios.get(
         `https://climap.onrender.com/api/facilities/retrieve?page=${currentPage}`
       );
       if (!response.ok) throw new Error("Failed to fetch facilities");
@@ -94,7 +95,7 @@ const Browse = () => {
         page: currentPage,
       });
 
-      const response = await fetch(
+      const response = await axios.get(
         `https://climap.onrender.com/api/facilities/search?${queryParams}`
       );
       if (!response.ok) throw new Error("Search failed");

@@ -14,7 +14,7 @@ const router = Router();
 router.get("/retrieve", retrieve);
 router.post("/add", authenticateUser, add);
 router.post("/addBulk", authenticateUser, addBulk);
-router.post("/search", authenticateUser, search);
+router.get("/search", search);
 router.get("/modify", modify);
 router.get("/remove", remove);
 export default router;
