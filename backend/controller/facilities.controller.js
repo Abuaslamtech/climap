@@ -83,7 +83,7 @@ export const retrieve = async (req, res) => {
 
 // search controller
 
-export const searchFacilities = async (req, res) => {
+export const search = async (req, res) => {
   const { query, page = 1, pageSize = 12 } = req.query;
 
   try {
