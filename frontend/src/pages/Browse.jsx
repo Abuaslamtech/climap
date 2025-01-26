@@ -74,7 +74,7 @@ const Browse = () => {
 
       setFacilities(data.facilities);
       setTotalPages(data.totalPages);
-      setTotalFacilities(data.totalFacilities);
+      setTotalFacilities(data.facilities.length);
     } catch (error) {
       setError(error.message);
     } finally {
@@ -264,21 +264,88 @@ const Browse = () => {
             Add Facility
           </Link>
         </div>
-
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
           </div>
         ) : facilities.length > 0 ? (
-          <div className="flex gap-8">
+          <div className=" flex gap-8 ">
             <div className="w-full grid md:grid-cols-2 gap-12 justify-between items-center">
               {facilities.map((facility) => (
                 <div
                   key={facility._id}
-                  className="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 cursor-pointer p-6 border border-gray-100 hover:border-[#8BD39E] transform hover:-translate-y-1"
+                  className=" group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 cursor-pointer p-6 border border-gray-100 hover:border-[#8BD39E] transform hover:-translate-y-1"
                   onClick={() => setSelectedFacility(facility)}
                 >
-                  {/* Facility card content */}
+                  <div className="flex flex-col gap-2 justify-between items-start mb-4">
+                    <div className="w-full flex flex-row justify-between items-start ">
+                      <h3 className="w-1/2   md:text-xl font-bold text-gray-900 mb-2 group-hover:text-[#28A745] transition-colors">
+                        {facility.name}
+                      </h3>
+                      <span className="  md:w-1/3 text-center bg-gradient-to-r from-accentGold to-[#1C7430] text-white p-2 md:px-4 md:py-2 rounded-full text-[0.5rem] md:text-sm font-normal md:font-medium shadow-sm">
+                        {facility.category}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-600 ">
+                      <MapPin size={16} className="text-[#28A745]" />
+                      <span className="group-hover:text-[#28A745] transition-colors">
+                        {facility.lga_name}, {facility.state_name}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6 mt-6">
+                    {[
+                      {
+                        icon: Hospital,
+                        label: "Facility Type",
+                        value: facility.type,
+                      },
+                      {
+                        icon: User,
+                        label: "Registered By",
+                        value: facility.registeredBy,
+                      },
+                      {
+                        icon: Calendar,
+                        label: "Added On",
+                        value: formatDate(facility.createdAt),
+                      },
+                      {
+                        icon: MapPin,
+                        label: "LGA Code",
+                        value: facility.lga_code,
+                      },
+                    ].map(({ icon: Icon, label, value }) => (
+                      <div
+                        key={label}
+                        className="bg-[#F8F9FA] rounded-lg p-4 group-hover:bg-[#8BD39E]/20 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Icon size={20} className="text-[#28A745]" />
+                          <div>
+                            <p className="text-sm text-gray-500">{label}</p>
+                            <p className="font-semibold text-gray-900">
+                              {value}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-gray-100">
+                    <button
+                      className="w-full bg-primary hover:bg-primarydark text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
+                      onClick={() => {
+                        setSelectedFacility(facility);
+                        setIsModalOpen(true);
+                      }}
+                    >
+                      <span>View Details</span>
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

@@ -84,26 +84,37 @@ export const retrieve = async (req, res) => {
 // search controller
 
 export const search = async (req, res) => {
-  const { query, page = 1, pageSize = 12 } = req.query;
+  const {
+    query = "",
+    state = "",
+    lga = "",
+    category = "",
+    page = 1,
+    pageSize = 12,
+  } = req.query;
 
   try {
-    if (!query) {
-      return res.status(400).json({ message: "Search query is required" });
-    }
+    const searchQuery = {};
 
-    const searchQuery = {
-      $or: [
+    // Add text search if query exists
+    if (query) {
+      searchQuery.$or = [
         { name: { $regex: query, $options: "i" } },
         { state_name: { $regex: query, $options: "i" } },
         { lga_name: { $regex: query, $options: "i" } },
-      ],
-    };
+      ];
+    }
+
+    // Add additional filters
+    if (state) searchQuery.state_name = state;
+    if (lga) searchQuery.lga_name = lga;
+    if (category) searchQuery.category = category;
 
     const skipValue = (page - 1) * pageSize;
     const totalCount = await Facilities.countDocuments(searchQuery);
     const facilities = await Facilities.find(searchQuery)
       .skip(skipValue)
-      .limit(pageSize);
+      .limit(Number(pageSize));
 
     if (facilities.length === 0) {
       return res.status(404).json({ message: "No facilities found" });
@@ -111,7 +122,7 @@ export const search = async (req, res) => {
 
     res.status(200).json({
       facilities,
-      currentPage: page,
+      currentPage: Number(page),
       totalPages: Math.ceil(totalCount / pageSize),
       totalFacilities: totalCount,
     });
@@ -120,6 +131,5 @@ export const search = async (req, res) => {
     res.status(500).json({ message: "Search failed" });
   }
 };
-
 export const modify = async (req, res) => {};
 export const remove = async (req, res) => {};
