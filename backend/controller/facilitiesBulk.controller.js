@@ -3,53 +3,66 @@ import Facilities from "../model/facilities.model.js";
 export const addBulk = async (req, res) => {
   try {
     const features = req.body;
-    const operations = [];
-    const errors = [];
+    const CHUNK_SIZE = 1000;
+    let insertedCount = 0;
+    const allErrors = [];
 
-    // 1. Prepare bulk operations
-    features.forEach((feature) => {
-      if (!feature.name || !feature.state_name || !feature.lga_name) {
-        errors.push({ feature, error: "Missing required fields" });
-        return;
-      }
+    // Process in chunks
+    for (let i = 0; i < features.length; i += CHUNK_SIZE) {
+      const chunk = features.slice(i, i + CHUNK_SIZE);
+      const operations = [];
+      const chunkErrors = [];
 
-      operations.push({
-        insertOne: {
-          document: {
-            ...feature,
-            registeredBy: "Admin",
-            geometry: feature.geometry || {
-              type: "Point",
-              coordinates: [0, 0],
+      // Prepare chunk operations
+      chunk.forEach((feature) => {
+        if (!feature.name || !feature.state_name || !feature.lga_name) {
+          chunkErrors.push({ feature, error: "Missing required fields" });
+          return;
+        }
+
+        operations.push({
+          insertOne: {
+            document: {
+              ...feature,
+              registeredBy: "Admin",
+              geometry: feature.geometry || {
+                type: "Point",
+                coordinates: [0, 0],
+              },
             },
           },
-        },
+        });
       });
-    });
 
-    // 2. Execute single bulk operation
-    const result = await Facilities.bulkWrite(operations, { ordered: false });
+      // Process chunk
+      try {
+        const result = await Facilities.bulkWrite(operations, {
+          ordered: false,
+        });
+        insertedCount += result.insertedCount;
+        allErrors.push(...chunkErrors);
+      } catch (error) {
+        const mongoErrors =
+          error.writeErrors?.map((e) => ({
+            feature: e.err.op.insertOne.document,
+            error: e.errmsg,
+          })) || [];
+        allErrors.push(...chunkErrors, ...mongoErrors);
+      }
+    }
 
-    // 3. Handle response
     res.status(201).json({
-      inserted: result.insertedCount,
+      inserted: insertedCount,
       errors: {
-        count: errors.length,
-        samples: errors.slice(0, 50), // Show first 50 errors only
+        count: allErrors.length,
+        samples: allErrors.slice(0, 50),
       },
     });
   } catch (error) {
-    // Handle MongoDB errors
-    const mongoErrors =
-      error.writeErrors?.map((e) => ({
-        feature: e.err.op.insertOne.document,
-        error: e.errmsg,
-      })) || [];
-
+    console.error("Bulk insert failed:", error);
     res.status(500).json({
-      error: "Bulk insert partially failed",
-      inserted: error.result?.insertedCount || 0,
-      errors: mongoErrors.slice(0, 50),
+      error: "Bulk insert failed",
+      message: error.message,
     });
   }
 };
