@@ -1,72 +1,55 @@
 import Facilities from "../model/facilities.model.js";
 
 export const addBulk = async (req, res) => {
-  const features = req.body;
-  const facilities = [];
-  const errors = [];
   try {
-    for (const feature of features) {
-      const {
-        name,
-        state_name,
-        lga_name,
-        lga_code,
-        state_code,
-        category,
-        type,
-        geometry,
-      } = feature;
-      //   validate input
-      if (!name || !state_name || !lga_name) {
-        errors.push({
-          message: "Missing required fields",
-          details: properties,
-        });
-        continue;
-      }
-      // check if facility exist
-      const existingFacility = await Facilities.findOne({
-        name,
-      });
-      if (existingFacility) {
-        errors.push({
-          message: "Facility already exists",
-          details: { name },
-        });
-        continue;
-      }
-      // save facility
-      const newFacility = new Facilities({
-        name,
-        state_name,
-        lga_name,
-        lga_code,
-        state_code,
-        category,
-        type,
-        geometry,
-        registeredBy: "Admin",
-      });
+    const features = req.body;
+    const operations = [];
+    const errors = [];
 
-      try {
-        const savedFacility = await newFacility.save();
-        facilities.push(savedFacility);
-      } catch (err) {
-        console.error(err);
-        errors.push({
-          message: "Error saving Facility",
-          details: { name },
-        });
+    // 1. Prepare bulk operations
+    features.forEach((feature) => {
+      if (!feature.name || !feature.state_name || !feature.lga_name) {
+        errors.push({ feature, error: "Missing required fields" });
+        return;
       }
-    }
-    res.status(201).json({
-      message: "facilities processed",
-      success_count: facilities.length,
-      failed_count: errors.length,
-      errors,
+
+      operations.push({
+        insertOne: {
+          document: {
+            ...feature,
+            registeredBy: "Admin",
+            geometry: feature.geometry || {
+              type: "Point",
+              coordinates: [0, 0],
+            },
+          },
+        },
+      });
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Internal Server error" });
+
+    // 2. Execute single bulk operation
+    const result = await Facilities.bulkWrite(operations, { ordered: false });
+
+    // 3. Handle response
+    res.status(201).json({
+      inserted: result.insertedCount,
+      errors: {
+        count: errors.length,
+        samples: errors.slice(0, 50), // Show first 50 errors only
+      },
+    });
+  } catch (error) {
+    // Handle MongoDB errors
+    const mongoErrors =
+      error.writeErrors?.map((e) => ({
+        feature: e.err.op.insertOne.document,
+        error: e.errmsg,
+      })) || [];
+
+    res.status(500).json({
+      error: "Bulk insert partially failed",
+      inserted: error.result?.insertedCount || 0,
+      errors: mongoErrors.slice(0, 50),
+    });
   }
 };
