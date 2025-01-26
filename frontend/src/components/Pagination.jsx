@@ -1,10 +1,9 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-// Add Pagination UI at the bottom of facilities list:
-export const Pagination = ({ currentPage, totalPages }) => (
+export const Pagination = ({ currentPage, totalPages, onPageChange }) => (
   <div className="flex justify-center items-center gap-4 mt-8">
     <button
-      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+      onClick={() => onPageChange(currentPage - 1)}
       disabled={currentPage === 1}
       className="p-2 rounded-lg border disabled:opacity-50"
     >
@@ -14,7 +13,7 @@ export const Pagination = ({ currentPage, totalPages }) => (
       Page {currentPage} of {totalPages}
     </span>
     <button
-      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+      onClick={() => onPageChange(currentPage + 1)}
       disabled={currentPage === totalPages}
       className="p-2 rounded-lg border disabled:opacity-50"
     >

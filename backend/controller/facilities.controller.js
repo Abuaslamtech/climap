@@ -47,7 +47,7 @@ export const add = async (req, res) => {
   }
 };
 
-// In your retrieve controller:
+// retrieve controller:
 export const retrieve = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const pageSize = 12;
@@ -80,5 +80,46 @@ export const retrieve = async (req, res) => {
     res.status(500).json({ message: "Couldn't retrieve data" });
   }
 };
+
+// search controller
+
+export const searchFacilities = async (req, res) => {
+  const { query, page = 1, pageSize = 12 } = req.query;
+
+  try {
+    if (!query) {
+      return res.status(400).json({ message: "Search query is required" });
+    }
+
+    const searchQuery = {
+      $or: [
+        { name: { $regex: query, $options: "i" } },
+        { state_name: { $regex: query, $options: "i" } },
+        { lga_name: { $regex: query, $options: "i" } },
+      ],
+    };
+
+    const skipValue = (page - 1) * pageSize;
+    const totalCount = await Facilities.countDocuments(searchQuery);
+    const facilities = await Facilities.find(searchQuery)
+      .skip(skipValue)
+      .limit(pageSize);
+
+    if (facilities.length === 0) {
+      return res.status(404).json({ message: "No facilities found" });
+    }
+
+    res.status(200).json({
+      facilities,
+      currentPage: page,
+      totalPages: Math.ceil(totalCount / pageSize),
+      totalFacilities: totalCount,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Search failed" });
+  }
+};
+
 export const modify = async (req, res) => {};
 export const remove = async (req, res) => {};

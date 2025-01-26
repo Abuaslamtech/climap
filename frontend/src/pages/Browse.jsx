@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Search,
   MapPin,
@@ -36,71 +36,97 @@ const Browse = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [totalFacilities, setTotalFacilities] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTimeout, setSearchTimeout] = useState(null);
+
+  // Reset to page 1 when any filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    filters.state_name,
+    filters.lga_name,
+    filters.category,
+    filters.searchQuery,
+  ]);
 
   // Fetch facilities data when component mounts or filters change
   useEffect(() => {
-    const getData = async () => {
-      try {
-        setIsLoading(true);
-        const queryParams = new URLSearchParams({
-          page: currentPage,
-          ...(filters.state_name && { state: filters.state_name }),
-        });
-        const response = await fetch(
-          `https://climap.onrender.com/api/facilities/retrieve?${queryParams}`
-        );
-        if (!response.ok) throw new Error("Failed to fetch facilities");
-        const data = await response.json();
+    if (
+      filters.searchQuery ||
+      filters.state_name ||
+      filters.lga_name ||
+      filters.category
+    ) {
+      searchAndFilterFacilities();
+    } else {
+      fetchFacilities();
+    }
+  }, [currentPage, filters]);
 
-        setFacilities(data.facilities);
-        setTotalPages(data.totalPages);
-        setTotalFacilities(data.totalFacilities);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // Fetch facilities (general retrieval)
+  const fetchFacilities = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        `https://climap.onrender.com/api/facilities/retrieve?page=${currentPage}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch facilities");
+      const data = await response.json();
 
-    getData();
-  }, [currentPage, filters.state_name]);
+      setFacilities(data.facilities);
+      setTotalPages(data.totalPages);
+      setTotalFacilities(data.totalFacilities);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  // Filter facilities based on search query and selected filters
-  const filteredFacilities = useMemo(() => {
-    if (!facilities.length) return [];
+  // Search and filter facilities
+  const searchAndFilterFacilities = async () => {
+    try {
+      setIsLoading(true);
+      const queryParams = new URLSearchParams({
+        query: filters.searchQuery,
+        state: filters.state_name,
+        lga: filters.lga_name,
+        category: filters.category,
+        page: currentPage,
+      });
 
-    return facilities.filter((facility) => {
-      const searchLower = filters.searchQuery.toLowerCase();
-      const stateName = facility.state_name?.toLowerCase() || "";
-      const lgaName = facility.lga_name?.toLowerCase() || "";
-      const category = facility.category?.toLowerCase() || "";
+      const response = await fetch(
+        `https://climap.onrender.com/api/facilities/search?${queryParams}`
+      );
+      if (!response.ok) throw new Error("Search failed");
+      const data = await response.json();
 
-      const matchesSearch =
-        !filters.searchQuery ||
-        facility.name.toLowerCase().includes(searchLower) ||
-        stateName.includes(searchLower);
-
-      const matchesState =
-        !filters.state_name || stateName === filters.state_name.toLowerCase();
-
-      const matchesLGA =
-        !filters.lga_name || lgaName === filters.lga_name.toLowerCase();
-
-      const matchesCategory =
-        !filters.category || category === filters.category.toLowerCase();
-
-      return matchesSearch && matchesState && matchesLGA && matchesCategory;
-    });
-  }, [facilities, filters]);
+      setFacilities(data.facilities);
+      setTotalPages(data.totalPages);
+      setTotalFacilities(data.totalFacilities);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Handle filter changes
   const handleFilterChange = (name, value) => {
-    setFilters((prev) => {
-      if (name === "state_name") {
-        return { ...prev, [name]: value, lga_name: "" };
-      }
-      return { ...prev, [name]: value };
-    });
+    setFilters((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "state_name" && { lga_name: "" }),
+    }));
+  };
+
+  // Debounced search input handler
+  const handleSearch = (value) => {
+    if (searchTimeout) clearTimeout(searchTimeout);
+    setSearchTimeout(
+      setTimeout(() => {
+        handleFilterChange("searchQuery", value);
+      }, 300) // 300ms debounce
+    );
   };
 
   // Format date to a readable format
@@ -149,9 +175,13 @@ const Browse = () => {
                   placeholder="Search Facility..."
                   className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-lg"
                   value={filters.searchQuery}
-                  onChange={(e) =>
-                    handleFilterChange("searchQuery", e.target.value)
-                  }
+                  onChange={(e) => {
+                    setFilters((prev) => ({
+                      ...prev,
+                      searchQuery: e.target.value,
+                    }));
+                    handleSearch(e.target.value);
+                  }}
                 />
                 <Search
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -198,7 +228,6 @@ const Browse = () => {
                           {localGovt}
                         </option>
                       ))}
-                    {filters.state_name.toLowerCase()}
                   </select>
 
                   <select
@@ -224,9 +253,7 @@ const Browse = () => {
         <div className="flex justify-between items-center mb-8 border-b border-primary pb-4">
           <div className="w-2/5 bg-gradient-to-r from-[#28A745] to-[#1C7430] text-transparent bg-clip-text">
             <h2 className="border-l-8 border-primary pl-2 text-xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accentGold bg-clip-text text-transparent">
-              {isLoading
-                ? "Loading..."
-                : `${filteredFacilities.length} Facilities Found`}
+              {isLoading ? "Loading..." : `${totalFacilities} Facilities Found`}
             </h2>
           </div>
           <Link
@@ -242,84 +269,16 @@ const Browse = () => {
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
           </div>
-        ) : filteredFacilities.length > 0 ? (
-          <div className=" flex gap-8 ">
+        ) : facilities.length > 0 ? (
+          <div className="flex gap-8">
             <div className="w-full grid md:grid-cols-2 gap-12 justify-between items-center">
-              {filteredFacilities.map((facility) => (
+              {facilities.map((facility) => (
                 <div
                   key={facility._id}
-                  className=" group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 cursor-pointer p-6 border border-gray-100 hover:border-[#8BD39E] transform hover:-translate-y-1"
+                  className="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 cursor-pointer p-6 border border-gray-100 hover:border-[#8BD39E] transform hover:-translate-y-1"
                   onClick={() => setSelectedFacility(facility)}
                 >
-                  <div className="flex flex-col gap-2 justify-between items-start mb-4">
-                    <div className="w-full flex flex-row justify-between items-start ">
-                      <h3 className="w-1/2   md:text-xl font-bold text-gray-900 mb-2 group-hover:text-[#28A745] transition-colors">
-                        {facility.name}
-                      </h3>
-                      <span className="  md:w-1/3 text-center bg-gradient-to-r from-accentGold to-[#1C7430] text-white p-2 md:px-4 md:py-2 rounded-full text-[0.5rem] md:text-sm font-normal md:font-medium shadow-sm">
-                        {facility.category}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-gray-600 ">
-                      <MapPin size={16} className="text-[#28A745]" />
-                      <span className="group-hover:text-[#28A745] transition-colors">
-                        {facility.lga_name}, {facility.state_name}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-6 mt-6">
-                    {[
-                      {
-                        icon: Hospital,
-                        label: "Facility Type",
-                        value: facility.type,
-                      },
-                      {
-                        icon: User,
-                        label: "Registered By",
-                        value: facility.registeredBy,
-                      },
-                      {
-                        icon: Calendar,
-                        label: "Added On",
-                        value: formatDate(facility.createdAt),
-                      },
-                      {
-                        icon: MapPin,
-                        label: "LGA Code",
-                        value: facility.lga_code,
-                      },
-                    ].map(({ icon: Icon, label, value }) => (
-                      <div
-                        key={label}
-                        className="bg-[#F8F9FA] rounded-lg p-4 group-hover:bg-[#8BD39E]/20 transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
-                          <Icon size={20} className="text-[#28A745]" />
-                          <div>
-                            <p className="text-sm text-gray-500">{label}</p>
-                            <p className="font-semibold text-gray-900">
-                              {value}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-6 pt-4 border-t border-gray-100">
-                    <button
-                      className="w-full bg-primary hover:bg-primarydark text-white font-medium px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
-                      onClick={() => {
-                        setSelectedFacility(facility);
-                        setIsModalOpen(true);
-                      }}
-                    >
-                      <span>View Details</span>
-                      <ChevronRight size={16} />
-                    </button>
-                  </div>
+                  {/* Facility card content */}
                 </div>
               ))}
             </div>
@@ -344,7 +303,13 @@ const Browse = () => {
             </button>
           </div>
         )}
-        <Pagination currentPage={currentPage} totalPages={totalPages} />
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={(newPage) =>
+            setCurrentPage(Math.max(1, Math.min(newPage, totalPages)))
+          }
+        />
       </div>
       {isModalOpen && (
         <MapModal

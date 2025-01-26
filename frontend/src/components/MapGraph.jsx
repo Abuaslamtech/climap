@@ -131,7 +131,7 @@ function MapGraph({ facilities }) {
       <PulseStyle />
       <MapContainer
         center={nigeriaCenter}
-        zoom={6}
+        zoom={10}
         style={{ height: "500px", width: "100%" }}
         minZoom={6}
         maxZoom={18}
